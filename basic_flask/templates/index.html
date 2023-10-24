@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+{% if user %}
+    <h1>Hello {{ user }}!</h1>
+{% else %}
+    <h1>Hello stranger!</h1>
+{%endif%}
+{% for x in mylist %}
+<h3>{{ x }}</h3>
+{% endfor %}
+<table>
+<th>age</th>
+<th>name</th>
+{% for x in mydicts %}
+    <tr>
+        <td>{{ x.age }}</td>
+        <td>{{ x.name }}</td>
+    </tr>
+{% endfor %}
+</table>
+
+
+<img src="{{ url_for('static', filename='images/kishuk.jpg') }}" alt="">
+{% endblock %}

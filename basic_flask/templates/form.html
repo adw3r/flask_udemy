@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+
 <h1>Basic Form</h1>
 
 <form method="POST" action="/form" enctype="application/json">
@@ -7,3 +10,4 @@
     <input type="text" name="surname">
     <input type="submit" value="Submit">
 </form>
+{% endblock %}
