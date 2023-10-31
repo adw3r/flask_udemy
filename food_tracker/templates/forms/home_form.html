@@ -1,0 +1,7 @@
+<form action="{{ url_for('home') }}" method="POST" enctype="application/x-www-form-urlencoded">
+    <div class="form-group">
+        <label for="new-day">New Day</label>
+        <input class="form-control" id="new-day" type="date" name="entry_date">
+    </div>
+    <button class="btn btn-primary" type="submit" value="submit">Add</button>
+</form>

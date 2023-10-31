@@ -1,0 +1,19 @@
+<form action="{{ url_for('food') }}" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="food-name">Food Name</label>
+        <input class="form-control" id="food-name" placeholder="Food Name" type="text" name="name">
+    </div>
+    <div class="form-group">
+        <label for="protein">Protein</label>
+        <input class="form-control" id="protein" placeholder="Protein" type="number" name="proteins">
+    </div>
+    <div class="form-group">
+        <label for="carbohydrates">Carbohydrates</label>
+        <input class="form-control" id="carbohydrates" placeholder="Carbohydrates" type="number" name="carbs">
+    </div>
+    <div class="form-group">
+        <label for="fat">Fat</label>
+        <input class="form-control" id="fat" placeholder="Fat" type="number" name="fats">
+    </div>
+    <button class="btn btn-primary" type="submit">Add</button>
+</form>

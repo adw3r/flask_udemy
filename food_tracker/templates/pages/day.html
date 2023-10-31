@@ -1,26 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include('head.html') %}
-<body>
-{% include('nav_bar.html') %}
+{% extends 'base.html' %}
 
+{% block content %}
 <div class="container theme-showcase col-sm-6 col-sm-offset-3" role="main">
     <div class="row">
         <div>
             <div class="panel panel-primary">
                 <div class="panel-heading">
-                    {% if date %}
-                        <h3 class="panel-title">{{ date }}</h3>
-                    {% else %}
-                        <h3 class="panel-title">Today</h3>
-                    {% endif %}
+                    <h3 class="panel-title">{{ pretty_date }}</h3>
                 </div>
                 <div class="panel-body">
-                    <form action="{{ url_for('day', date='20221201') }}" method="POST">
+                    <form action="{{ url_for('day', date=date) }}" method="POST">
                         <div class="form-group">
                             <select class="form-control" name="food_selected">
                                 {% for food in food_results %}
-                                    <option value={{ food.id }}>{{ food.name }}</option>
+                                <option value={{ food.id }}>{{ food.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -38,19 +31,18 @@
                 <div class="page-header"></div>
 
                 {% for log in log_results %}
-                    <div class="panel-body">
-                        <ul class="nav nav-pills" role="tablist">
-                            <li class="active"><a>{{ log.name }}</a></li>
-                            <li><a>Protein: <span class="badge">{{ log.proteins }}</span></a></li>
-                            <li><a>Carbohydates: <span class="badge">{{ log.carbs }}</span></a></li>
-                            <li><a>Fat: <span class="badge">{{ log.fats }}</span></a></li>
-                            <li><a>Calories: <span class="badge">{{ log.calories }}</span></a></li>
-                        </ul>
-                    </div>
+                <div class="panel-body">
+                    <ul class="nav nav-pills" role="tablist">
+                        <li class="active"><a>{{ log.name }}</a></li>
+                        <li><a>Protein: <span class="badge">{{ log.proteins }}</span></a></li>
+                        <li><a>Carbohydates: <span class="badge">{{ log.carbs }}</span></a></li>
+                        <li><a>Fat: <span class="badge">{{ log.fats }}</span></a></li>
+                        <li><a>Calories: <span class="badge">{{ log.calories }}</span></a></li>
+                    </ul>
+                </div>
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
-</body>
-</html>
+{% endblock %}
