@@ -82,22 +82,50 @@ def home():
     return render_template('home.html', head_title='Home', results=results)
 
 
-@app.route('/days', methods=['POST', 'GET'])
+@app.route('/days', methods=['GET', 'POST'])
 @app.route('/days/<date>', methods=['GET', 'POST'])
 def day(date: str | None = None):
-    if date:
-        db = get_db()
-        cur = db.execute('select entry_date from log_dates where entry_date = ?', [date])
-        result = dict(cur.fetchone())
-        date = datetime.datetime.strptime(str(result['entry_date']), DB_DATE_FORMAT).strftime(PRETTY_DATE_FORMAT)
+    if not date:
+        return render_template('day.html', head_title='Day Details')
 
-        food_cur = db.execute('select id, name from foods')
-        food_results = food_cur.fetchall()
-        print(food_results)
+    db = get_db()
+    date_cur = db.execute('select id, entry_date from log_dates where entry_date = ?', [date])
+    food_cur = db.execute('select id, name from foods')
+    log_cur = db.execute('''
+    select name, proteins, carbs, fats, calories from log_dates 
+    join 
+    food_date on food_date.log_dates_id = log_dates.id 
+    join foods on food_date.foods_id = foods.id 
+    where log_dates.entry_date = ?''', [date])
 
-        return render_template('day.html', head_title='Day Details', date=date, food_results=food_results)
+    date_result = date_cur.fetchone()
+    if request.method == 'POST':
+        insertion_data = [request.form['food_selected'], date_result['id']]
+        db.execute('insert into food_date (foods_id, log_dates_id) values (?, ?)', insertion_data)
+        db.commit()
+    log_results = log_cur.fetchall()
 
-    return render_template('day.html', head_title='Day Details')
+    totals = {
+        'proteins': 0,
+        'carbs': 0,
+        'fats': 0,
+        'calories': 0,
+    }
+
+    for food in log_results:
+        totals['proteins'] += food['proteins']
+        totals['carbs'] += food['carbs']
+        totals['fats'] += food['fats']
+        totals['calories'] += food['calories']
+
+    return render_template(
+        'day.html',
+        head_title='Day Details',
+        date=datetime.datetime.strptime(str(date_result['entry_date']), DB_DATE_FORMAT).strftime(PRETTY_DATE_FORMAT),
+        food_results=food_cur.fetchall(),
+        log_results=log_results,
+        totals=totals
+    )
 
 
 @app.route('/foods', methods=['POST', 'GET'])
