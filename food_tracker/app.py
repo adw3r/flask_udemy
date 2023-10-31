@@ -75,15 +75,15 @@ def home():
         db.commit()
     cur = db.execute('select * from log_dates order by entry_date asc')
     results = [
-        {'entry_date': datetime.datetime.strptime(str(i['entry_date']), DB_DATE_FORMAT).strftime(PRETTY_DATE_FORMAT)} for i in
-        cur.fetchall()
+        {'entry_date': datetime.datetime.strptime(str(row['entry_date']), DB_DATE_FORMAT).strftime(PRETTY_DATE_FORMAT)}
+        for row in cur.fetchall()
     ]
     print(results)
     return render_template('home.html', head_title='Home', results=results)
 
 
 @app.route('/days', methods=['POST', 'GET'])
-@app.route('/days/<date>', methods=['GET'])
+@app.route('/days/<date>', methods=['GET', 'POST'])
 def day(date: str | None = None):
     if date:
         db = get_db()
