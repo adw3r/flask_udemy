@@ -64,10 +64,10 @@ def home():
         db.commit()
     sql_stmt = '''
         select entry_date, sum(proteins) as proteins, sum(carbs) as carbs, sum(fats) as fats, sum(calories) as calories from log_dates
-            join food_date on food_date.log_dates_id = log_dates.id
-            join foods on food_date.foods_id = foods.id
+            left join food_date on food_date.log_dates_id = log_dates.id
+            left join foods on food_date.foods_id = foods.id
             group by log_dates.id
-            order by entry_date asc
+            order by entry_date desc 
     '''
     cur = db.execute(sql_stmt)
     results = [
