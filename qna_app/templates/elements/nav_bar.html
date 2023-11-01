@@ -1,18 +1,32 @@
 <nav class="navbar navbar-inverse navbar-fixed-top">
-  <div class="container">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="#">Questions & Answers</a>
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{{ url_for('question') }}">Questions & Answers</a>
+        </div>
+        <div class="navbar-collapse collapse" id="navbar">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="{{ url_for('home') }}">Home</a></li>
+
+                {% if not user %}
+                <li><a href="{{ url_for('ask') }}">Ask Question</a></li>
+                {% endif %}
+
+                {% if user and user['expert'] %}
+                <li><a href="{{ url_for('answer') }}">Answer Questions</a></li>
+                {% endif %}
+
+                {% if user and user['admin'] %}
+                <li><a href="{{ url_for('users') }}">User Setup</a></li>
+                {% endif %}
+
+
+                {% if user %}
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+                {% endif %}
+            </ul>
+        </div><!--/.nav-collapse -->
     </div>
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Home</a></li>
-        <li><a href="#">Login</a></li>
-        <li><a href="#">Register</a></li>
-        <li><a href="#">Ask Question</a></li>
-        <li><a href="#">Answer Questions</a></li>
-        <li><a href="#">User Setup</a></li>
-        <li><a href="#">Logout</a></li>
-      </ul>
-    </div><!--/.nav-collapse -->
-  </div>
 </nav>
