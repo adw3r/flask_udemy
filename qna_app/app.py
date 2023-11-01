@@ -38,7 +38,8 @@ def home():
 
 @app.route('/logout')
 def logout():
-    del session['user']
+    if session.get('user'):
+        del session['user']
     return redirect(url_for('home'))
 
 
@@ -83,10 +84,21 @@ def question():
     return render_template('pages/question.html', head_title='Question', user=user)
 
 
-@app.route('/ask')
+@app.route('/ask', methods=['GET', 'POST'])
 def ask():
     user = get_current_user()
-    return render_template('pages/ask.html', head_title='Ask a Question', user=user)
+    if not user:
+        return redirect(url_for('login'))
+    db = database.get_db()
+    experts_cur = db.execute('select id, name from users where expert = true')
+    experts = experts_cur.fetchall()
+    if request.method == 'POST':
+        form_data = request.form.to_dict()
+        insertion_data = form_data['question'], user['id'], form_data['expert_id']
+        db.execute('insert into questions (question, asked_by_id, expert_id) values (?, ?, ?)', insertion_data)
+        db.commit()
+
+    return render_template('pages/ask.html', head_title='Ask a Question', user=user, experts=experts)
 
 
 @app.route('/answer')

@@ -7,7 +7,7 @@
             <ul class="nav navbar-nav">
                 <li class="active"><a href="{{ url_for('home') }}">Home</a></li>
 
-                {% if not user %}
+                {% if user and not user['expert'] and not user['admin'] %}
                 <li><a href="{{ url_for('ask') }}">Ask Question</a></li>
                 {% endif %}
 
