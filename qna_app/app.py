@@ -33,7 +33,46 @@ def index():
 @app.route('/home')
 def home():
     user = get_current_user()
-    return render_template('pages/home.html', head_title=f'Questions & Answers', user=user)
+    db = database.get_db()
+    q_cur = db.execute('''
+        select 
+        questions.id as id, 
+        questions.question as text, 
+        users_experts.name as expert_name, 
+        users_asked_by.name as asked_by_name 
+        from questions 
+        join users as users_asked_by on users_asked_by.id = questions.asked_by_id 
+        join users as users_experts on users_experts.id = questions.expert_id
+        where questions.answer_text is not Null
+    ''')
+    questions_data = q_cur.fetchall()
+    print(questions_data)
+    return render_template(
+        'pages/home.html',
+        head_title=f'Questions & Answers',
+        user=user,
+        questions_data=questions_data
+    )
+
+
+@app.route('/question/<int:question_id>')
+def question(question_id):
+    user = get_current_user()
+    db = database.get_db()
+    q_cur = db.execute('''
+        select 
+        questions.question as text, 
+        questions.answer_text as answer, 
+        users_experts.name as expert_name, 
+        users_asked_by.name as asked_by_name 
+        from questions 
+        join users as users_asked_by on users_asked_by.id = questions.asked_by_id 
+        join users as users_experts on users_experts.id = questions.expert_id
+        where questions.id = ?
+    ''', [question_id])
+    question_data = q_cur.fetchone()
+    print(question_data)
+    return render_template('pages/question.html', head_title='Question', user=user, question=question_data)
 
 
 @app.route('/logout')
@@ -78,12 +117,6 @@ def register():
     return render_template('pages/register.html', head_title='Register')
 
 
-@app.route('/question')
-def question():
-    user = get_current_user()
-    return render_template('pages/question.html', head_title='Question', user=user)
-
-
 @app.route('/ask', methods=['GET', 'POST'])
 def ask():
     user = get_current_user()
@@ -101,16 +134,43 @@ def ask():
     return render_template('pages/ask.html', head_title='Ask a Question', user=user, experts=experts)
 
 
-@app.route('/answer')
-def answer():
+@app.route('/answer/<int:question_id>', methods=['GET', 'POST'])
+def answer(question_id):
     user = get_current_user()
-    return render_template('pages/answer.html', head_title='Answer Question', user=user)
+    if not user:
+        return redirect(url_for('login'))
+
+    db = database.get_db()
+    if request.method == 'POST':
+        db.execute('update questions set answer_text = ? where id = ?', [request.form['answer_text'], question_id])
+        db.commit()
+        return redirect(url_for('unanswered'))
+    sql_stmt = '''
+    select * from questions where questions.id = ?
+    '''
+    question_cur = db.execute(sql_stmt, [question_id])
+    question_data = question_cur.fetchone()
+    return render_template('pages/answer.html', head_title='Answer Question', user=user, question_data=question_data)
 
 
 @app.route('/unanswered')
 def unanswered():
     user = get_current_user()
-    return render_template('pages/unanswered.html', head_title='Unanswered Questions', user=user)
+    if not user:
+        return redirect(url_for('login'))
+    db = database.get_db()
+    print(user)
+    q_cur = db.execute(
+        '''
+        select questions.id, questions.question, users.name from questions 
+        left join users on questions.asked_by_id = users.id 
+        where questions.expert_id = ? and answer_text is Null
+        ''',
+        [user['id']]
+    )
+    questions = q_cur.fetchall()
+    print(questions)
+    return render_template('pages/unanswered.html', head_title='Unanswered Questions', user=user, questions=questions)
 
 
 @app.route('/promote/<user_id>')
@@ -124,6 +184,8 @@ def promote(user_id):
 @app.route('/users')
 def users():
     user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
     if user['admin']:
         db = database.get_db()
         users_cur = db.execute('select id, name, expert, admin from users')

@@ -2,13 +2,11 @@
 
 {% block content %}
     <div class="container theme-showcase" role="main">
-
       <div class="jumbotron">
-        <h1>What?</h1>
-        <p>This is the answer.</p>
-        <p><a class="btn btn-primary btn-lg">Asked By: Herbert</a></p>
-        <p><a class="btn btn-primary btn-lg">Answered By: Anthony</a></p>
+        <h1>{{ question.text }}</h1>
+        <p>{{ question.answer }}</p>
+        <p><a class="btn btn-primary btn-lg">Asked By: {{ question.asked_by_name }}</a></p>
+        <p><a class="btn btn-primary btn-lg">Answered By: {{ question.expert_name }}</a></p>
       </div>
-
     </div> <!-- /container -->
 {% endblock %}
