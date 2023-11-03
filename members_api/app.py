@@ -1,4 +1,5 @@
-from flask import Flask, g, redirect, url_for
+import logging
+from flask import Flask, g, redirect, url_for, request, jsonify
 
 import database
 import settings
@@ -13,29 +14,55 @@ def close_db(error):
         g.sqlite_db.close()
 
 
-@app.route('/')
-def index():
-    return redirect(url_for('home'))
-
-
 @app.route('/members', methods=['GET'])
 def get_members():
-    return {'hello': 'world'}
+    db = database.get_db()
+    cur = db.execute('select * from members')
+    members = [dict(i) for i in cur.fetchall()]
+    return jsonify(members)
 
 
 @app.route('/members', methods=['POST'])
 def add_member():
-    return {'hello': 'world'}
+    new_member_data = request.get_json()
+    db = database.get_db()
+    try:
+        cur = db.execute('insert into members (name, email, level) values (:name, :email, :level) returning *',
+                         new_member_data)
+        new_member_data = dict(next(cur))
+        db.commit()
+        print(cur)
+        print(new_member_data)
+        new_member_data['created'] = True
+    except Exception as error:
+        logging.exception(error)
+        new_member_data['created'] = False
+
+    return new_member_data
 
 
 @app.route('/members/<int:member_id>', methods=['GET'])
 def get_member(member_id):
-    return {'hello': 'world', 'member_id': member_id}
+    db = database.get_db()
+    cur = db.execute('select * from members where id = ?', [member_id])
+    member = cur.fetchone()
+
+    data = {'member': dict(member)}
+    return data
 
 
-@app.route('/members/<int:member_id>', methods=['PUT', 'PATCH'])
-def update_member(member_id):
-    return {'hello': 'world', 'member_id': member_id}
+@app.route('/members/<int:member_id>', methods=['PUT'])
+def patch_member(member_id):
+    member_data = request.get_json()
+    parameters = [member_data.get('name'), member_data.get('email'), member_data.get('level'), member_id]
+    print(parameters)
+
+    db = database.get_db()
+    cur = db.execute('update members set name = ?, email = ?, level = ? where id = ? returning *', parameters)
+    data = next(cur)
+    db.commit()
+
+    return {'hello': 'world', 'member_id': member_id, 'parameters': parameters}
 
 
 @app.route('/members/<int:member_id>', methods=['DELETE'])

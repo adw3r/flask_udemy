@@ -1,0 +1,36 @@
+POST /members HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+
+{
+  "name": "test",
+  "email": "wezxasqw@gmail.com",
+  "level": "1"
+}
+
+###
+
+GET /members HTTP/1.1
+host: localhost:8000
+accept: */*
+
+###
+
+GET /members/1 HTTP/1.1
+host: localhost:8000
+accept: */*
+
+###
+
+PUT /members/1 HTTP/1.1
+host: localhost:8000
+accept: */*
+content-type: application/json
+
+{
+  "email": "wezxasqw@gmail.com",
+  "level": "1",
+  "name": "put new name of member"
+}
+
+###
