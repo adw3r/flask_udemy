@@ -1,5 +1,6 @@
 POST /members HTTP/1.1
 Host: localhost:8000
+Accept: */*
 Content-Type: application/json
 
 {
@@ -11,21 +12,21 @@ Content-Type: application/json
 ###
 
 GET /members HTTP/1.1
-host: localhost:8000
-accept: */*
+Host: localhost:8000
+Accept: */*
 
 ###
 
 GET /members/1 HTTP/1.1
-host: localhost:8000
-accept: */*
+Host: localhost:8000
+Accept: */*
 
 ###
 
 PUT /members/1 HTTP/1.1
-host: localhost:8000
-accept: */*
-content-type: application/json
+Host: localhost:8000
+Accept: */*
+Content-Type: application/json
 
 {
   "email": "wezxasqw@gmail.com",
@@ -34,3 +35,14 @@ content-type: application/json
 }
 
 ###
+
+DELETE /members/1 HTTP/1.1
+Host: localhost:8000
+Accept: */*
+
+###
+
+GET /members HTTP/1.1
+Host: localhost:8000
+Accept: */*
+Authorization: Basic dGVzdDpwYXNzd29yZA==

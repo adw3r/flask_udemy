@@ -1,11 +1,23 @@
 import logging
 from flask import Flask, g, redirect, url_for, request, jsonify
 
+from functools import wraps
+
 import database
 import settings
 
 app = Flask('members api')
 app.config['SECRET_KEY'] = settings.SECRET_KEY
+
+
+def protected(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        auth = request.authorization
+        if not auth:
+            return jsonify({'message': 'Auth required'}), 403
+        return func(*args, **kwargs)
+    return inner
 
 
 @app.teardown_appcontext
@@ -15,10 +27,11 @@ def close_db(error):
 
 
 @app.route('/members', methods=['GET'])
+@protected
 def get_members():
     db = database.get_db()
     cur = db.execute('select * from members')
-    members = [dict(i) for i in cur.fetchall()]
+    members = {'members': [dict(i) for i in cur.fetchall()]}
     return jsonify(members)
 
 
@@ -67,7 +80,20 @@ def patch_member(member_id):
 
 @app.route('/members/<int:member_id>', methods=['DELETE'])
 def delete_member(member_id):
-    return {'hello': 'world', 'member_id': member_id}
+    try:
+        db = database.get_db()
+
+        cur = db.execute('select * from members where id = ?', [member_id])
+        user = cur.fetchone()
+        if not user:
+            return {'message': 'user has not been deleted', 'member_id': member_id}, 403
+        db.execute('delete from members where id = ?', [member_id])
+        db.commit()
+        return {'message': f'user has been deleted', 'member_id': member_id}
+    except Exception as error:
+        import logging
+        logging.exception(error)
+        return {'message': 'user has not been deleted', 'member_id': member_id}, 403
 
 
 if __name__ == '__main__':
