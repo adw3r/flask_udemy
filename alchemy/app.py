@@ -1,23 +1,20 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 import models
 import settings
+from database import db
 
 app = Flask('alchemy app')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.DB_URI
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['DEBUG'] = settings.APP_DEBUG
-
-db = SQLAlchemy(model_class=models.Base)
 db.init_app(app)
 
 
 @app.route('/')
 def get_members():
     members = db.session.query(models.Member).all()
-    print(members)
     return [i.serialize for i in members]
 
 
